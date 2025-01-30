@@ -2,12 +2,7 @@ import type { H3Event } from 'h3'
 import { eventHandler, getQuery, sendRedirect } from 'h3'
 import { withQuery } from 'ufo'
 import { defu } from 'defu'
-import {
-  handleMissingConfiguration,
-  handleAccessTokenErrorResponse,
-  getOAuthRedirectURL,
-  requestAccessToken,
-} from '../utils'
+import { handleMissingConfiguration, handleAccessTokenErrorResponse, getOAuthRedirectURL, requestAccessToken } from '../utils'
 import { useRuntimeConfig } from '#imports'
 import type { OAuthConfig } from '#auth-utils'
 
@@ -53,18 +48,13 @@ export interface OAuthPassportConfig {
   state?: string
 }
 
-export function defineOAuthPassportEventHandler({
-  config,
-  onSuccess,
-  onError,
-}: OAuthConfig<OAuthPassportConfig>) {
+export function defineOAuthPassportEventHandler({ config, onSuccess, onError }: OAuthConfig<OAuthPassportConfig>) {
   return eventHandler(async (event: H3Event) => {
     config = defu(config, useRuntimeConfig(event).oauth?.passport, {
       baseURL: 'https://passport.laravel.com',
       userURL: 'https://passport.laravel.com/api/auth/me',
     }) as OAuthPassportConfig
 
-    const query = getQuery<{ code?: string }>(event)
 
     if (!config.clientId || !config.clientSecret) {
       return handleMissingConfiguration(
@@ -74,6 +64,8 @@ export function defineOAuthPassportEventHandler({
         onError,
       )
     }
+
+    const query = getQuery<{ code?: string }>(event)
     const redirectURL = config.redirectURL || getOAuthRedirectURL(event)
     if (!query.code) {
       config.scope = config.scope || []
@@ -112,12 +104,11 @@ export function defineOAuthPassportEventHandler({
     const user: any = await $fetch(`${config.baseURL}${config.userURL}` as string, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
+        ContentType: 'application/json',
+        Accept: 'application/json',
       },
     })
 
-    return onSuccess(event, {
-      tokens,
-      user,
-    })
+    return onSuccess(event, { tokens, user })
   })
 }
