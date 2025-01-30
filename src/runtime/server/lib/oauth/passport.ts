@@ -55,7 +55,6 @@ export function defineOAuthPassportEventHandler({ config, onSuccess, onError }: 
       userURL: 'https://passport.laravel.com/api/auth/me',
     }) as OAuthPassportConfig
 
-
     if (!config.clientId || !config.clientSecret) {
       return handleMissingConfiguration(
         event,
