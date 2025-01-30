@@ -46,7 +46,11 @@ export interface OAuthPassportConfig {
    * @default process.env.NUXT_OAUTH_PASSPORT_REDIRECT_URL or current URL
    */
   redirectURL?: string
-
+  /**
+   * State to pass to the OAuth provider and receive back in the callback
+   * @default ''
+   */
+  state?: string
 }
 
 export function defineOAuthPassportEventHandler({
@@ -73,6 +77,8 @@ export function defineOAuthPassportEventHandler({
     const redirectURL = config.redirectURL || getOAuthRedirectURL(event)
     if (!query.code) {
       config.scope = config.scope || []
+      config.state = config.state || ''
+
       // Redirect to Passport Oauth page
       return sendRedirect(
         event,
@@ -81,6 +87,7 @@ export function defineOAuthPassportEventHandler({
           client_id: config.clientId,
           redirect_uri: redirectURL,
           scope: config.scope.join(' '),
+          state: config.state,
         }),
       )
     }
